@@ -1,3 +1,12 @@
 Flask
+Flask-SQLAlchemy
+nltk
+deep_translator
+emoji
+matplotlib
+requests
+wordcloud
+pandas
+seaborn
 gunicorn
-tensorflow
+
