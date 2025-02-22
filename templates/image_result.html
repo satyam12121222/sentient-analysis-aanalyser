@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Analysis Result - Sentient Analysis</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      background: #000;
+      color: #0F0;
+      font-family: monospace;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .result-img {
+      max-width: 100%;
+      height: auto;
+      border: 2px solid #0F0;
+      padding: 10px;
+    }
+    .btn-custom {
+      background-color: #0F0;
+      color: #000;
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      transition: background 0.3s;
+    }
+    .btn-custom:hover {
+      background-color: #0c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container text-center">
+    <h1>Image Analysis Result</h1>
+    <p class="fs-3">Detected Sentiment: <strong>{{ sentiment }}</strong></p>
+    <img src="{{ image_url }}" alt="Uploaded Image" class="result-img mt-3">
+    <div class="mt-4">
+      <a href="/predict_image" class="btn btn-outline-light">Analyze Another Image</a>
+      <a href="/" class="btn btn-custom">Back to Dashboard</a>
+    </div>
+  </div>
+</body>
+</html>
