@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis Result - Sentient Analysis</title>
+  <!-- Google Fonts for hacker vibe -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  <style>
+    /* Matrix background styling */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow-x: hidden;
+      background: black;
+      color: #0F0;
+      font-family: 'VT323', monospace;
+    }
+    #matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -2;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
+    .container { position: relative; z-index: 2; }
+    .section-title {
+      margin: 40px 0 20px;
+      text-align: center;
+      font-size: 1.8rem;
+      text-shadow: 0 0 5px #0F0;
+    }
+    .card { margin-bottom: 20px; }
+    /* Sidebar styling */
+    .sidebar {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 20px;
+      border: 1px solid #0F0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,255,0,0.6);
+      animation: slideIn 0.8s ease-out forwards;
+      opacity: 0;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .emoji-option {
+      font-size: 2rem;
+      cursor: pointer;
+      margin: 5px;
+      border: none;
+      background: transparent;
+      color: #0F0;
+      transition: transform 0.2s ease;
+    }
+    .emoji-option:hover { transform: scale(1.3); }
+    /* Responsive layout using CSS grid */
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 992px) {
+      .content-wrapper {
+        grid-template-columns: 3fr 1fr;
+      }
+    }
+    .btn-custom {
+      background-color: #0F0;
+      color: #000;
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      transition: background 0.3s;
+    }
+    .btn-custom:hover { background-color: #0c0; }
+  </style>
+</head>
+<body>
+  <!-- Matrix Digital Rain Canvas -->
+  <canvas id="matrix"></canvas>
+  
+  <!-- Navigation with Export Button -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">Sentient Analysis</a>
+      <div class="ms-auto">
+        <a href="/export" class="btn btn-custom">Export Report</a>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Main Content with Sidebar -->
+  <div class="container my-5 content-wrapper">
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <h1 class="text-center mb-4">Analysis Result</h1>
+      
+      <!-- Text Analysis Card -->
+      {% if user_text %}
+      <div class="card">
+        <div class="card-header">Input Text</div>
+        <div class="card-body">
+          <p class="card-text">{{ user_text }}</p>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">Detected Sentiment</div>
+        <div class="card-body">
+          <h3 class="card-title text-{{ 'success' if sentiment=='Positive' else 'danger' if sentiment=='Negative' else 'secondary' }}">{{ sentiment }}</h3>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">Sentiment Breakdown</div>
+        <div class="card-body text-center">
+          {% if scores %}
+            <p><strong>Positive:</strong> {{ scores.pos }}</p>
+            <p><strong>Neutral:</strong> {{ scores.neu }}</p>
+            <p><strong>Negative:</strong> {{ scores.neg }}</p>
+            <p><strong>Compound:</strong> {{ scores.compound }}</p>
+          {% endif %}
+          {% if chart_url %}
+            <img src="{{ chart_url }}" alt="Sentiment Chart" class="img-fluid mt-3">
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">Word Cloud</div>
+        <div class="card-body text-center">
+          {% if wordcloud_url %}
+            <img src="{{ wordcloud_url }}" alt="Word Cloud" class="img-fluid">
+          {% else %}
+            <p>No word cloud available.</p>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">Emoji Analysis</div>
+        <div class="card-body">
+          <p class="fs-4">Extracted Emojis: {{ emojis }}</p>
+        </div>
+      </div>
+      {% endif %}
+      
+      <!-- Image Analysis Section -->
+      {% if image_url %}
+      <div class="card">
+        <div class="card-header">Image Analysis</div>
+        <div class="card-body text-center">
+          <p class="fs-3">Detected Image Sentiment: <strong>{{ sentiment }}</strong></p>
+          <img src="{{ image_url }}" alt="Uploaded Image" class="img-fluid" style="max-width:400px; border: 2px solid #0F0; padding: 10px;">
+        </div>
+      </div>
+      {% endif %}
+      
+      <!-- Back Button -->
+      <div class="text-center mt-4">
+        <a href="/" class="btn btn-custom btn-lg">Analyze Another Text/Image</a>
+      </div>
+      
+      <!-- Analysis History -->
+      <section id="history-section" class="mt-5">
+        <h2 class="section-title">Analysis History</h2>
+        {% if history and history|length > 0 %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Text</th>
+                  <th>Sentiment</th>
+                  <th>Emojis</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for entry in history %}
+                  <tr>
+                    <td>{{ entry.text }}</td>
+                    <td>{{ entry.sentiment }}</td>
+                    <td>{{ entry.emojis }}</td>
+                    <td>{{ entry.timestamp }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-center">No analysis history available yet.</p>
+        {% endif %}
+      </section>
+    </div>
+    
+    <!-- Sidebar for Emoji Options -->
+    <div class="sidebar-content">
+      <div class="sidebar">
+        <h4>Emoji Quick Insert</h4>
+        <p>Select an emoji to insert into your input text:</p>
+        <button type="button" class="emoji-option" onclick="insertEmoji('😊')">😊</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('😃')">😃</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('❤️')">❤️</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('👍')">👍</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('😁')">😁</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('🎉')">🎉</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('😢')">😢</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('😡')">😡</button>
+        <button type="button" class="emoji-option" onclick="insertEmoji('💔')">💔</button>
+        <hr>
+        <h6>Custom Emoji Text</h6>
+        <input type="text" id="customEmoji" class="form-control" placeholder="e.g., :smile:" onkeyup="insertCustomEmoji()">
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3">
+    <div class="container">&copy; 2025 Sentient Analysis. All rights reserved.</div>
+  </footer>
+  
+  <!-- Matrix Digital Rain Script -->
+  <script>
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const letters = "0101010101ABCDEF".split("");
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = Array(columns).fill(1);
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 33);
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    function insertEmoji(emojiChar) {
+      const textArea = document.getElementById('text');
+      if(textArea) {
+        textArea.value += emojiChar;
+        textArea.focus();
+      }
+    }
+    function insertCustomEmoji() {
+      const customInput = document.getElementById('customEmoji');
+      const textArea = document.getElementById('text');
+      if(textArea && customInput.value) {
+        textArea.value += customInput.value;
+        customInput.value = '';
+        textArea.focus();
+      }
+    }
+    {% if history and history|length > 0 %}
+      const historyData = {{ history | tojson }};
+      const labels = historyData.map(item => item.timestamp);
+      const sentimentValues = historyData.map(item => {
+        return item.sentiment === "Positive" ? 1 : item.sentiment === "Negative" ? -1 : 0;
+      });
+      const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
+      new Chart(ctxTimeline, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Sentiment Trend',
+            data: sentimentValues,
+            borderColor: 'blue',
+            fill: false
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              ticks: {
+                callback: function(value) {
+                  return value === 1 ? 'Positive' : value === -1 ? 'Negative' : 'Neutral';
+                }
+              }
+            }
+          }
+        }
+      });
+    {% endif %}
+  </script>
+</body>
+</html>
